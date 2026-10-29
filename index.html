@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Landed Cost Estimator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one narrow card with a violet header band, a two-column input grid, a row-based cost breakdown, then call-outs and a collapsible rate basis. */
+:root {
+  color-scheme: light;
+  --bg: #f4f2f9;
+  --card: #ffffff;
+  --border: #e2ddf0;
+  --text: #1d1830;
+  --muted: #625b78;
+  --label: #4A3587;
+  --hdr-1: #4A3587;
+  --hdr-2: #33246b;
+  --hdr-accent: #22BAA2;
+  --hdr-eyebrow: #cfc4f2;
+  --hdr-text: #ffffff;
+  --hdr-sub: #e6e0f8;
+  --field-bg: #ffffff;
+  --field-focus: #4A3587;
+  --chip-bg: #efecf8;
+  --chip-text: #4A3587;
+  --total-bg: #efecf8;
+  --note-bg: #f8f6fc;
+  --amber: #c2700f;
+  --amber-bg: #fef3e2;
+  --amber-border: #f0d4a8;
+  --amber-text: #7a4a0c;
+  --green: #14806d;
+  --green-bg: #e6f7f4;
+  --green-border: #a6e2d8;
+  --green-text: #0e5e50;
+  --link: #4A3587;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12101c;
+    --card: #1b1829;
+    --border: #2e2947;
+    --text: #ece9f6;
+    --muted: #a29bba;
+    --label: #c8bcf4;
+    --hdr-1: #3f2f78;
+    --hdr-2: #2a1d55;
+    --hdr-accent: #22BAA2;
+    --field-bg: #141222;
+    --field-focus: #a995ea;
+    --chip-bg: #2a2542;
+    --chip-text: #d3c9f6;
+    --total-bg: #272240;
+    --note-bg: #171427;
+    --amber: #e0933a;
+    --amber-bg: #2b2112;
+    --amber-border: #5a4320;
+    --amber-text: #f0c987;
+    --green: #3fd1b9;
+    --green-bg: #0f2a27;
+    --green-border: #1f5a50;
+    --green-text: #8fe3d2;
+    --link: #bcaef2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12101c;
+  --card: #1b1829;
+  --border: #2e2947;
+  --text: #ece9f6;
+  --muted: #a29bba;
+  --label: #c8bcf4;
+  --hdr-1: #3f2f78;
+  --hdr-2: #2a1d55;
+  --hdr-accent: #22BAA2;
+  --field-bg: #141222;
+  --field-focus: #a995ea;
+  --chip-bg: #2a2542;
+  --chip-text: #d3c9f6;
+  --total-bg: #272240;
+  --note-bg: #171427;
+  --amber: #e0933a;
+  --amber-bg: #2b2112;
+  --amber-border: #5a4320;
+  --amber-text: #f0c987;
+  --green: #3fd1b9;
+  --green-bg: #0f2a27;
+  --green-border: #1f5a50;
+  --green-text: #8fe3d2;
+  --link: #bcaef2;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  font-family: "Urbanist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+.lc-root { max-width: 780px; margin: 0 auto; }
+.lc-root * { box-sizing: border-box; }
+
+.lc-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+
+.lc-header { border-bottom: 4px solid var(--hdr-accent); background: linear-gradient(135deg, var(--hdr-1) 0%, var(--hdr-2) 100%); color: var(--hdr-text); padding: 28px 28px 24px; }
+.lc-eyebrow-row { display: flex; flex-wrap: wrap; gap: 8px 12px; place-items: center; margin: 0 0 10px; }
+.lc-eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; font-weight: 600; color: var(--hdr-eyebrow); margin: 0; }
+.lc-stamp { font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(34,186,162,.28); color: var(--hdr-text); }
+.lc-header h1 { font-family: "Chillax", "Urbanist", sans-serif; margin: 0 0 8px; font-size: 24px; font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+.lc-header p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--hdr-sub); max-width: 580px; }
+
+.lc-form { padding: 24px 28px 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+.lc-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lc-field.full { grid-column: 1 / -1; }
+.lc-field label { font-size: 12.5px; font-weight: 600; color: var(--label); }
+.lc-field label .lc-opt { color: var(--muted); font-weight: 400; font-style: italic; }
+.lc-field small { font-size: 11.5px; color: var(--muted); }
+
+select, input[type="number"] {
+  font-family: inherit; font-size: 15px; padding: 9px 11px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--field-bg); color: var(--text);
+  width: 100%; min-width: 0;
+}
+select { cursor: pointer; }
+select:focus-visible, input[type="number"]:focus-visible {
+  outline: 2px solid var(--field-focus); outline-offset: 1px; border-color: var(--field-focus);
+}
+
+.lc-prefix-row { display: flex; gap: 8px; }
+.lc-prefix-row span {
+  display: flex; place-items: center; padding: 0 13px;
+  background: var(--chip-bg); border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; font-weight: 600; color: var(--chip-text); white-space: nowrap;
+}
+.lc-prefix-row input { flex: 1; }
+
+.lc-results-wrap { padding: 4px 28px 26px; }
+.lc-placeholder { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 20px; color: var(--muted); font-size: 14px; }
+.lc-result { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 20px; animation: lcf .25s ease; }
+@keyframes lcf { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .lc-result { animation: none; } }
+
+.lc-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.lc-tag { display: inline-flex; place-items: center; background: var(--chip-bg); color: var(--chip-text); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+.lc-tag.good { background: var(--green-bg); color: var(--green-text); }
+.lc-tag.warn { background: var(--amber-bg); color: var(--amber-text); }
+
+.lc-rows { display: block; margin-bottom: 8px; }
+.lc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.4; }
+.lc-val { justify-self: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lc-sub { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+.lc-zero { color: var(--green); font-weight: 700; }
+.lc-total { background: var(--total-bg); border-bottom: none; border-radius: 8px; padding: 12px 10px; font-weight: 700; font-size: 15px; margin-top: 4px; }
+
+.lc-mult { font-size: 13px; color: var(--muted); text-align: right; margin: 8px 0 14px; }
+.lc-mult strong { color: var(--label); }
+.lc-vat { font-size: 12px; color: var(--muted); padding: 8px 10px; background: var(--note-bg); border-radius: 6px; margin: 0 0 12px; line-height: 1.5; }
+
+.lc-callout { border-radius: 10px; padding: 13px 15px; font-size: 13px; line-height: 1.55; margin-top: 10px; }
+.lc-callout.amber { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber-text); }
+.lc-callout.green { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green-text); }
+
+.lc-basis { border-top: 1px solid var(--border); background: var(--note-bg); padding: 14px 28px; }
+.lc-basis summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--label); }
+.lc-basis summary:focus-visible { outline: 2px solid var(--field-focus); outline-offset: 3px; border-radius: 4px; }
+.lc-basis h2 { font-family: "Chillax", "Urbanist", sans-serif; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 16px 0 6px; }
+.lc-basis ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text); }
+.lc-basis li { margin-bottom: 3px; }
+.lc-basis a { color: var(--link); overflow-wrap: anywhere; }
+
+.lc-disc { padding: 16px 28px 22px; font-size: 11.5px; line-height: 1.55; color: var(--muted); border-top: 1px solid var(--border); }
+
+@media (max-width: 540px) {
+  .lc-form { grid-template-columns: 1fr; }
+  .lc-header, .lc-form, .lc-results-wrap, .lc-basis, .lc-disc { padding-left: 18px; padding-right: 18px; }
+  .lc-row { font-size: 13.5px; }
+}
+</style>
+</head>
+<body>
+
+<div class="lc-root">
+<div class="lc-card">
+
+  <header class="lc-header">
+    <div class="lc-eyebrow-row">
+      <p class="lc-eyebrow">India Sourcing Calculator</p>
+      <span class="lc-stamp">Rates reviewed 29 Oct 2026</span>
+    </div>
+    <h1>India Landed Cost Estimator</h1>
+    <p>Enter a FOB value and shipment details to see an estimated landed cost from an Indian manufacturer, with freight, import duty, VAT or GST and clearance shown line by line.</p>
+  </header>
+
+  <div class="lc-form">
+    <div class="lc-field">
+      <label for="lc-dest">Destination market</label>
+      <select id="lc-dest">
+        <option value="uk">United Kingdom</option>
+        <option value="eu">European Union</option>
+        <option value="us">United States</option>
+        <option value="au">Australia</option>
+        <option value="uae">UAE</option>
+      </select>
+    </div>
+
+    <div class="lc-field">
+      <label for="lc-cat">Product category</label>
+      <select id="lc-cat">
+        <option value="apparel">Apparel and garments</option>
+        <option value="home_textiles">Home textiles</option>
+        <option value="metal">Metal parts and castings</option>
+        <option value="machinery">Industrial machinery</option>
+        <option value="electronics">Electronics and components</option>
+        <option value="plastics">Plastic components</option>
+      </select>
+    </div>
+
+    <div class="lc-field full">
+      <label for="lc-fob">FOB value (ex-factory India)</label>
+      <div class="lc-prefix-row">
+        <span>USD</span>
+        <input type="number" id="lc-fob" placeholder="e.g. 25000" step="100" min="0" inputmode="decimal">
+      </div>
+    </div>
+
+    <div class="lc-field">
+      <label for="lc-mode">Shipment mode</label>
+      <select id="lc-mode">
+        <option value="sea_lcl">Sea freight, LCL (less than container load)</option>
+        <option value="sea_fcl">Sea freight, FCL (20ft container)</option>
+        <option value="air">Air freight</option>
+      </select>
+    </div>
+
+    <div class="lc-field">
+      <label for="lc-quote">Freight quote <span class="lc-opt">optional</span></label>
+      <div class="lc-prefix-row">
+        <span>USD</span>
+        <input type="number" id="lc-quote" placeholder="From your forwarder" step="50" min="0" inputmode="decimal">
+      </div>
+      <small>A quote replaces the freight estimate.</small>
+    </div>
+  </div>
+
+  <div class="lc-results-wrap">
+    <div id="lc-result" aria-live="polite"></div>
+  </div>
+
+  <details class="lc-basis">
+    <summary>Rate basis and sources</summary>
+
+    <h2>Duty and tax rates</h2>
+    <ul>
+      <li><strong>United Kingdom:</strong> India-UK CETA in force from 15 July 2026. Duty of up to 12% on textiles and apparel and up to 18% on engineering goods is 0% for qualifying goods. VAT 20%.</li>
+      <li><strong>European Union:</strong> no EU-India FTA in force. Negotiations concluded 27 January 2026, the Commission tabled its proposal on 11 September 2026 and entry into force is expected in the first half of 2027. Average standard VAT 21.9%, with member states between 17% and 27%. CBAM definitive period began 1 January 2026.</li>
+      <li><strong>United States:</strong> 10% Section 301 duty on India from 24 July 2026, replacing the 10% Section 122 surcharge that ran from 24 February to 24 July 2026. Section 232 metals rates under Proclamation 11032, effective 8 June 2026 to 31 December 2027. Average standard duty 12% for apparel (HTS chapter 62) and 9% for made-up textiles (chapter 63).</li>
+      <li><strong>Australia:</strong> ECTA gives 0% on every tariff line for Indian-origin goods from 1 January 2026. GST 10%.</li>
+      <li><strong>UAE:</strong> CEPA in force since 1 May 2022, 0% on about 80% of tariff lines from day one, standard duty 5%, VAT 5%.</li>
+    </ul>
+
+    <h2>Freight benchmarks behind the estimate bands</h2>
+    <ul>
+      <li>MSC base rate, Nhava Sheva to Antwerp: US$3,650 per container for July 2026, US$4,650 for August, US$6,150 after the 29 July price adjustment, before surcharges.</li>
+      <li>India to US East Coast: about US$10,000 per 40ft container in July 2026, easing to about US$5,200 in September.</li>
+      <li>Drewry World Container Index: US$4,585 per 40ft container on 22 October 2026.</li>
+      <li>TAC Index: air rates out of India remained above the previous year in October 2026.</li>
+      <li>The percentage bands are planning assumptions built on these benchmarks. Shorter lanes such as the UAE usually cost less.</li>
+    </ul>
+
+    <h2>Sources</h2>
+    <ul>
+      <li><a href="https://www.thomsonreuters.com/en-us/help/onesource-global-trade/regulatory-insights/2026/july-21st/in-uk-comprehensive-economic-trade-agreement" target="_blank" rel="noopener">Thomson Reuters ONESOURCE: India-UK CETA</a></li>
+      <li><a href="https://www.honigman.com/alert-3462" target="_blank" rel="noopener">Honigman: Section 301 tariffs effective 24 July 2026</a></li>
+      <li><a href="https://www.govinfo.gov/content/pkg/DCPD-202600375/html/DCPD-202600375.htm" target="_blank" rel="noopener">Proclamation 11032, Section 232 metals</a></li>
+      <li><a href="https://www.europarl.europa.eu/legislative-train/theme-a-global-europe-leveraging-our-power-and-partnerships/file-eu-india-fta-bit-and-gi-agreement" target="_blank" rel="noopener">European Parliament: EU-India FTA status</a></li>
+      <li><a href="https://www.newsonair.gov.in/duty-free-access-to-all-indian-exports-in-australia-as-ecta-comes-into-effect" target="_blank" rel="noopener">All India Radio: ECTA duty-free access from 1 January 2026</a></li>
+      <li><a href="https://www.gaston-schul.com/trade-intelligence/cbam/" target="_blank" rel="noopener">Gaston Schul: CBAM definitive period</a></li>
+      <li><a href="https://www.msc.com/en/newsroom/customer-advisories/2026/july/price-announcement-trade-from-india-and-pakistan-to-europe" target="_blank" rel="noopener">MSC: India to Europe price announcement</a></li>
+      <li><a href="https://cyprusshippingnews.com/2026-10-26/drewry-world-container-index-22-oct/" target="_blank" rel="noopener">Drewry World Container Index, 22 October 2026</a></li>
+      <li><a href="https://www.stattimes.com/amp/latest-news/global-air-freight-rates-dip-21-as-peak-season-approaches-1360915" target="_blank" rel="noopener">TAC Index air freight update, October 2026</a></li>
+    </ul>
+  </details>
+
+  <div class="lc-disc">
+    Estimates are indicative. Final figures come from your customs declaration and supplier quote. Duty rates follow the main tariff lines for each category and vary by HS code. Freight bands are planning assumptions, so a forwarder quote gives the most reliable figure. VAT and GST are shown at standard import rates, and accounting treatment varies by importer. Confirm final figures with a licensed freight forwarder and customs broker before you place an order.
+  </div>
+
+</div>
+</div>
+
+<script>
+(function () {
+
+/* Duty rates by destination and category, as a low and high percentage of CIF value. Reviewed 29 Oct 2026. */
+var DUTY = {
+  uk: {
+    apparel:       { lo: 0, hi: 0, note: 'India-UK CETA took effect on 15 July 2026 and removes duty of up to 12% on 1,143 textile and apparel lines for goods that meet the rules of origin.' },
+    home_textiles: { lo: 0, hi: 0, note: 'India-UK CETA took effect on 15 July 2026 and removes duty of up to 12% on made-up textiles for goods that meet the rules of origin.' },
+    metal:         { lo: 0, hi: 0, note: 'CETA gives 0% on 1,659 engineering lines, where duty ran up to 18%. Some cast articles already entered at 0%, so the saving depends on the HS code.' },
+    machinery:     { lo: 0, hi: 0, note: 'CETA gives 0% on 1,659 engineering lines, where duty ran up to 18%, for goods that meet the rules of origin.' },
+    electronics:   { lo: 0, hi: 0, note: 'Most components already entered duty-free under the WTO Information Technology Agreement. CETA gives 0% on qualifying lines.' },
+    plastics:      { lo: 0, hi: 0, note: 'CETA gives duty-free access for plastic products that meet the rules of origin.' }
+  },
+  eu: {
+    apparel:       { lo: 8,   hi: 12,  note: 'EU Common Customs Tariff, 8% to 12% by fibre and garment type, with most lines at 12%.' },
+    home_textiles: { lo: 6.9, hi: 12,  note: 'EU Common Customs Tariff, 6.9% to 12% for bed linen, table linen and similar articles, with most cotton lines at 12%.' },
+    metal:         { lo: 0,   hi: 3,   note: 'Typical range for iron and steel castings and fabricated parts. Confirm the rate by CN code.' },
+    machinery:     { lo: 0,   hi: 3,   note: 'Typical range for industrial machinery and parts. Confirm the rate by CN code.' },
+    electronics:   { lo: 0,   hi: 0,   note: 'Most components are duty-free under the WTO Information Technology Agreement.' },
+    plastics:      { lo: 0,   hi: 6.5, note: 'EU duty on articles of plastics runs from 0% to 6.5% by subheading.' }
+  },
+  us: {
+    apparel:       { lo: 22, hi: 22, note: 'Average standard duty of 12% plus the 10% Section 301 duty. Individual lines run from 0% to 32% before the 10%.' },
+    home_textiles: { lo: 19, hi: 19, note: 'Average standard duty of 9% plus the 10% Section 301 duty.' },
+    metal:         { lo: 25, hi: 50, note: 'Section 232 covers most steel, aluminium and copper articles at 25% for derivatives or 50% for listed articles, on full value, in place of Section 301. Products with 15% or less metal by weight are excluded and pay the standard duty plus 10%.' },
+    machinery:     { lo: 10, hi: 25, note: 'Equipment with more than 15% steel, aluminium or copper by weight can fall under Section 232, at 15% combined for listed equipment until 31 December 2027 or 25% for other derivatives. Other machinery pays a low standard duty plus 10%.' },
+    electronics:   { lo: 0,  hi: 10, note: 'Standard duty of 0% under the Information Technology Agreement plus 10% Section 301. Check the Annex I and II exclusions in the Section 301 notice for your HS code.' },
+    plastics:      { lo: 10, hi: 16.5, note: 'Standard duty of 0% to 6.5% (many lines at 5.3%) plus 10% Section 301.' }
+  },
+  au: {
+    apparel:       { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' },
+    home_textiles: { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' },
+    metal:         { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' },
+    machinery:     { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' },
+    electronics:   { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' },
+    plastics:      { lo: 0, hi: 0, note: 'Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026 under ECTA.' }
+  },
+  uae: {
+    apparel:       { lo: 0, hi: 0, note: 'India-UAE CEPA gives 0% on garments with a valid proof of origin. The standard rate is 5%.' },
+    home_textiles: { lo: 0, hi: 0, note: 'India-UAE CEPA gives 0% on made-up textiles with a valid proof of origin. The standard rate is 5%.' },
+    metal:         { lo: 0, hi: 5, note: 'CEPA gives 0% on about 80% of lines from day one. Other lines follow 5 and 10 year schedules from May 2022. The standard rate is 5%.' },
+    machinery:     { lo: 0, hi: 5, note: 'CEPA gives 0% on about 80% of lines from day one. Other lines follow 5 and 10 year schedules from May 2022. The standard rate is 5%.' },
+    electronics:   { lo: 0, hi: 5, note: 'CEPA gives 0% on about 80% of lines from day one. Other lines follow 5 and 10 year schedules from May 2022. The standard rate is 5%.' },
+    plastics:      { lo: 0, hi: 5, note: 'CEPA gives 0% on about 80% of lines from day one. Other lines follow 5 and 10 year schedules from May 2022. The standard rate is 5%.' }
+  }
+};
+
+var VAT = {
+  uk:  { rate: 20,   label: 'VAT',            note: 'UK VAT of 20% applies at import on CIF plus duty. VAT-registered importers recover it through their VAT return.' },
+  eu:  { rate: 21.9, label: 'VAT (average)',  note: 'The EU average standard rate is 21.9%. Member state rates run from 17% to 27%. VAT-registered importers recover it.' },
+  us:  { rate: 0,    label: 'Federal VAT',    note: 'The US has no federal VAT. State sales tax applies at the point of sale.' },
+  au:  { rate: 10,   label: 'GST',            note: 'Australian GST of 10% applies on CIF plus duty. GST-registered importers claim it back on their BAS.' },
+  uae: { rate: 5,    label: 'VAT',            note: 'UAE VAT of 5% applies at import on CIF plus duty. Registered businesses recover it.' }
+};
+
+/* Freight as a share of FOB. Planning bands built on the October 2026 benchmarks listed under Rate basis. */
+var FREIGHT = {
+  sea_lcl: { lo: 0.14, hi: 0.30, label: 'Sea freight, LCL' },
+  sea_fcl: { lo: 0.09, hi: 0.20, label: 'Sea freight, FCL 20ft' },
+  air:     { lo: 0.28, hi: 0.50, label: 'Air freight' }
+};
+
+var INS = 0.008, CUSTOMS = 300;
+
+var DNAMES = { uk: 'United Kingdom', eu: 'European Union', us: 'United States', au: 'Australia', uae: 'UAE' };
+var CNAMES = { apparel: 'Apparel and garments', home_textiles: 'Home textiles', metal: 'Metal parts and castings', machinery: 'Industrial machinery', electronics: 'Electronics and components', plastics: 'Plastic components' };
+
+function usd(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function rng(lo, hi) { return Math.abs(lo - hi) < 80 ? usd(lo) : usd(lo) + ' to ' + usd(hi); }
+function pp(n) { return (n % 1 === 0 ? n : n.toFixed(1)) + '%'; }
+function rateText(d) { return d.lo === d.hi ? pp(d.lo) : pp(d.lo) + ' to ' + pp(d.hi); }
+function pct(x) { return Math.round(x * 100) + '%'; }
+
+function calc() {
+  var dest = document.getElementById('lc-dest').value;
+  var cat = document.getElementById('lc-cat').value;
+  var fob = parseFloat(document.getElementById('lc-fob').value);
+  var mode = document.getElementById('lc-mode').value;
+  var quote = parseFloat(document.getElementById('lc-quote').value);
+  var out = document.getElementById('lc-result');
+
+  if (isNaN(fob) || fob <= 0) {
+    out.innerHTML = '<div class="lc-placeholder">Enter a FOB value above to see your estimated landed cost.</div>';
+    return;
+  }
+
+  var useQuote = !isNaN(quote) && quote > 0;
+  var fr = FREIGHT[mode], d = DUTY[dest][cat], v = VAT[dest];
+
+  var flo = useQuote ? quote : fob * fr.lo;
+  var fhi = useQuote ? quote : fob * fr.hi;
+  var clo = fob + flo, chi = fob + fhi;
+  var ilo = clo * INS, ihi = chi * INS;
+  var cflo = clo + ilo, cfhi = chi + ihi;
+  var dlo = cflo * d.lo / 100, dhi = cfhi * d.hi / 100;
+  var vlo = (cflo + dlo) * v.rate / 100, vhi = (cfhi + dhi) * v.rate / 100;
+  var tlo = fob + flo + ilo + dlo + vlo + CUSTOMS;
+  var thi = fob + fhi + ihi + dhi + vhi + CUSTOMS;
+  var mlo = (tlo / fob).toFixed(2), mhi = (thi / fob).toFixed(2);
+  var zeroDuty = d.lo === 0 && d.hi === 0;
+
+  /* Tags */
+  var tags = '<span class="lc-tag">' + DNAMES[dest] + ' · ' + CNAMES[cat] + '</span>' +
+             '<span class="lc-tag">' + fr.label + '</span>';
+  if (dest === 'uk') tags += '<span class="lc-tag good">CETA in force 15 Jul 2026</span>';
+  if (dest === 'au') tags += '<span class="lc-tag good">ECTA 0% from 1 Jan 2026</span>';
+  if (dest === 'uae' && zeroDuty) tags += '<span class="lc-tag good">CEPA preference</span>';
+  if (dest === 'eu') tags += '<span class="lc-tag warn">No FTA in force yet</span>';
+  if (dest === 'us') tags += '<span class="lc-tag warn">Section 301: 10%</span>';
+
+  /* Table cells */
+  var dutyCell = zeroDuty ? '<span class="lc-zero">$0</span>' : rng(dlo, dhi);
+  var vatCell = v.rate === 0 ? 'N/A' : rng(vlo, vhi);
+  var freightSub = useQuote
+    ? 'Your forwarder quote, used as entered'
+    : 'Indicative band of ' + pct(fr.lo) + ' to ' + pct(fr.hi) + ' of FOB, built on October 2026 lane benchmarks. Enter a forwarder quote to replace it.';
+
+  /* Call-outs */
+  var callouts = '';
+  if (dest === 'uk') {
+    if (cat === 'apparel' || cat === 'home_textiles') {
+      callouts += '<div class="lc-callout green"><strong>CETA saving:</strong> The agreement took effect on 15 July 2026 and removes UK duty of up to 12% on ' + CNAMES[cat].toLowerCase() + '. On this order the previous rate would have added up to ' + usd(cfhi * 0.12) + '. Zero duty applies to goods that meet the rules of origin, with a self-certified origin declaration for each shipment and records kept for five years.</div>';
+    } else {
+      callouts += '<div class="lc-callout green"><strong>CETA:</strong> The agreement took effect on 15 July 2026 and gives 0% on nearly 99% of the tariff lines that cover Indian exports, for goods that meet the rules of origin. Inputs of non-Indian origin above the agreement thresholds disqualify the finished goods, so ask your supplier for the origin declaration before you order.</div>';
+    }
+  } else if (dest === 'eu') {
+    callouts += '<div class="lc-callout amber"><strong>No EU-India FTA yet:</strong> Negotiations concluded on 27 January 2026. The Commission tabled its proposal on 11 September 2026 and entry into force is expected in the first half of 2027. Standard EU duty applies until then.</div>';
+    if (cat === 'metal') {
+      callouts += '<div class="lc-callout amber"><strong>CBAM:</strong> The definitive period began on 1 January 2026. Listed iron, steel and aluminium goods, including screws and bolts, need an authorised EU declarant and CBAM certificates, which this estimate leaves out. An annual de minimis of 50 tonnes applies. The Council agreed its position in June 2026 to add 180 downstream products from 1 January 2028.</div>';
+    }
+  } else if (dest === 'us') {
+    callouts += '<div class="lc-callout amber"><strong>US tariffs on India:</strong> A 10% Section 301 duty has applied since 24 July 2026, added to the standard duty. The 18% rate announced in February 2026 never took effect. Twenty-five states sued on 3 August 2026 to block the Section 301 action, and trade talks continue, so rates can change before your shipment lands.</div>';
+  } else if (dest === 'au') {
+    if (cat === 'apparel' || cat === 'home_textiles') {
+      callouts += '<div class="lc-callout green"><strong>ECTA saving:</strong> Australia applies 0% to all Indian-origin goods from 1 January 2026. Most textiles and apparel paid 5% before, which would have added about ' + usd(cflo * 0.05) + ' to ' + usd(cfhi * 0.05) + ' to this order. Claim the preference with the origin documents the agreement requires.</div>';
+    } else {
+      callouts += '<div class="lc-callout green"><strong>ECTA:</strong> Australia applies 0% to every tariff line for Indian-origin goods from 1 January 2026. Claim the preference with the origin documents the agreement requires.</div>';
+    }
+  } else if (dest === 'uae') {
+    if (zeroDuty) {
+      callouts += '<div class="lc-callout green"><strong>CEPA preference:</strong> The standard UAE duty is 5%. Goods with a valid proof of origin enter at 0%. Without it, customs applies 5%, which would add about ' + usd(cflo * 0.05) + ' to ' + usd(cfhi * 0.05) + ' here.</div>';
+    } else {
+      callouts += '<div class="lc-callout amber"><strong>Check your HS code:</strong> CEPA gives 0% on about 80% of tariff lines from day one. The remaining lines follow 5 and 10 year schedules that began in May 2022. The range shown runs from 0% to the standard 5%. Without a valid proof of origin, customs applies 5%.</div>';
+    }
+  }
+  if (mode === 'air') {
+    callouts += '<div class="lc-callout amber"><strong>Air freight:</strong> Air costs several times more per kilogram than sea freight. TAC Index data shows spot rates out of India above last year in October 2026. Sea freight usually costs less for larger shipments.</div>';
+  }
+
+  out.innerHTML =
+    '<div class="lc-result">' +
+      '<div class="lc-tags">' + tags + '</div>' +
+      '<div class="lc-rows">' +
+        '<div class="lc-row"><div>FOB value (ex-factory India)<span class="lc-sub">Supplier price at the Indian port of export</span></div><div class="lc-val">' + usd(fob) + '</div></div>' +
+        '<div class="lc-row"><div>Freight<span class="lc-sub">' + freightSub + '</span></div><div class="lc-val">' + rng(flo, fhi) + '</div></div>' +
+        '<div class="lc-row"><div>Marine insurance<span class="lc-sub">About ' + pp(INS * 100) + ' of CIF value</span></div><div class="lc-val">' + rng(ilo, ihi) + '</div></div>' +
+        '<div class="lc-row"><div>Import duty<span class="lc-sub">' + rateText(d) + '. ' + d.note + '</span></div><div class="lc-val">' + dutyCell + '</div></div>' +
+        '<div class="lc-row"><div>' + v.label + ' *<span class="lc-sub">Applied on CIF plus duty at import</span></div><div class="lc-val">' + vatCell + '</div></div>' +
+        '<div class="lc-row"><div>Customs clearance and port handling<span class="lc-sub">Estimated fixed fee. Varies by agent, port and paperwork.</span></div><div class="lc-val">' + usd(CUSTOMS) + '</div></div>' +
+        '<div class="lc-row lc-total"><div>Estimated landed cost' + (useQuote ? '<span class="lc-sub">Uses your freight quote</span>' : '') + '</div><div class="lc-val">' + rng(tlo, thi) + '</div></div>' +
+      '</div>' +
+      '<p class="lc-mult">About <strong>' + (mlo === mhi ? mlo + '×' : mlo + '× to ' + mhi + '×') + '</strong> your FOB price</p>' +
+      '<p class="lc-vat">* ' + v.note + '</p>' +
+      callouts +
+    '</div>';
+}
+
+['lc-dest', 'lc-cat', 'lc-fob', 'lc-mode', 'lc-quote'].forEach(function (id) {
+  var el = document.getElementById(id);
+  el.addEventListener('input', calc);
+  el.addEventListener('change', calc);
+});
+
+document.getElementById('lc-fob').value = '25000';
+calc();
+
+})();
+</script>
+
+</body>
+</html>
